@@ -1,0 +1,11 @@
+{
+  "name": "llm-hunter",
+  "owner": { "name": "abhixz13" },
+  "plugins": [
+    {
+      "name": "llm-hunter",
+      "source": "./",
+      "description": "Deep, deterministic multi-agent pentest / bug bounty engine, driven by the /llmhunter command. Runs on your Claude Code subscription."
+    }
+  ]
+}

@@ -1,0 +1,8 @@
+{
+  "name": "llm-hunter",
+  "version": "0.1.0",
+  "description": "Layered, LLM-agnostic multi-agent engine that turns a coding agent into a disciplined pentest / bug bounty operator. Scope is the only guardrail.",
+  "author": { "name": "abhixz13" },
+  "homepage": "https://github.com/abhixz13/LLM_Enhancer",
+  "keywords": ["pentest", "bug-bounty", "security", "multi-agent", "recon"]
+}

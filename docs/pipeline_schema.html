@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>LLM Hunter — Pipeline Architecture</title>
+<style>
+  :root{
+    --bg:#0c0f14; --bg2:#11151c; --panel:#151a22; --panel2:#1a212b;
+    --line:#28313e; --line2:#333f4f;
+    --ink:#e7eef6; --muted:#93a1b2; --faint:#6b7889;
+    --blue:#5b8def; --green:#41c471; --orange:#e0a13a; --red:#f2604f;
+    --teal:#38c6cf; --violet:#a884f0;
+    --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    --sans: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;}
+  .page{
+    background:
+      radial-gradient(1200px 600px at 78% -8%, rgba(91,141,239,.10), transparent 60%),
+      radial-gradient(1000px 500px at 8% 108%, rgba(168,132,240,.08), transparent 55%),
+      var(--bg);
+    color:var(--ink); font-family:var(--sans);
+    padding:34px clamp(16px,4vw,52px) 60px; min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1280px; margin:0 auto;}
+  .eyebrow{font-family:var(--mono); font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--faint);}
+  h1{font-size:clamp(24px,3.4vw,36px); font-weight:750; margin:.28em 0 .1em; letter-spacing:-.01em; text-wrap:balance;}
+  .lede{color:var(--muted); font-size:15px; max-width:74ch; margin:0;}
+  .legend{display:flex; flex-wrap:wrap; gap:8px 18px; margin:22px 0 10px; font-size:12.5px; color:var(--muted); font-family:var(--mono);}
+  .legend b{display:inline-flex; align-items:center; gap:7px; font-weight:400;}
+  .sw{width:10px; height:10px; border-radius:3px; display:inline-block;}
+  .card{background:linear-gradient(180deg,var(--panel),var(--bg2)); border:1px solid var(--line); border-radius:14px; padding:16px 18px;}
+  .card h3{margin:0 0 12px; font-size:12.5px; font-family:var(--mono); letter-spacing:.12em; text-transform:uppercase;}
+  .tag{font-family:var(--mono); font-size:11px; color:var(--faint);}
+  .flow{text-align:center; color:var(--faint); font-family:var(--mono); font-size:12px; margin:7px 0;}
+  .spine{display:flex; flex-direction:column; gap:16px; margin-top:20px;}
+  .band{display:grid; gap:14px;}
+  .intake{grid-template-columns:1.1fr auto 1fr; align-items:center;}
+  .intake .arrow{color:var(--faint); font-family:var(--mono); font-size:20px; text-align:center;}
+  .qlist{display:flex; flex-direction:column; gap:6px; margin-top:2px;}
+  .qlist span{font-size:12.5px; color:var(--muted);}
+  .qlist span::before{content:"› "; color:var(--blue); font-family:var(--mono);}
+  .rules{border-color:var(--blue); background:linear-gradient(180deg, rgba(91,141,239,.10), var(--bg2));}
+  .rules .code{font-family:var(--mono); font-size:12px; color:var(--muted); line-height:1.7;}
+  .rules .k{color:var(--blue);}
+  .banner{border:1px dashed var(--blue); border-radius:12px; padding:11px 16px; text-align:center; font-family:var(--mono); font-size:12.5px; color:var(--muted);}
+  .banner b{color:var(--ink); font-weight:600;}
+  .loop{grid-template-columns:1fr 260px 1fr; align-items:stretch;}
+  @media(max-width:960px){ .loop{grid-template-columns:1fr;} .intake{grid-template-columns:1fr;} .intake .arrow{transform:rotate(90deg);} }
+  .wf{border-radius:14px; padding:16px; border:1px solid rgba(65,196,113,.5); background:linear-gradient(180deg, rgba(65,196,113,.07), var(--bg2)); display:flex; flex-direction:column; gap:9px;}
+  .wf h4{margin:0; font-size:13px; font-family:var(--mono); letter-spacing:.06em; color:var(--green); text-transform:uppercase;}
+  .row5{display:flex; flex-wrap:wrap; gap:6px;}
+  .node{border:1px solid var(--line2); border-radius:8px; background:var(--panel2); padding:9px 11px; font-size:12.5px; text-align:center;}
+  .node.mid{border-color:rgba(65,196,113,.45);}
+  .node.master{border-color:var(--green); font-weight:650; background:rgba(65,196,113,.10);}
+  .node.ctrl{border-color:var(--teal); background:rgba(56,198,207,.10); font-weight:600;}
+  .node .s{display:block; font-family:var(--mono); font-size:10.5px; color:var(--faint); margin-top:3px; font-weight:400;}
+  .retry{font-family:var(--mono); font-size:11px; color:var(--teal); text-align:center; line-height:1.5;}
+  .hub{border:1.5px solid var(--red); border-radius:14px; background:linear-gradient(180deg, rgba(242,96,79,.10), var(--bg2)); padding:18px 14px; display:flex; flex-direction:column; justify-content:center; gap:10px; text-align:center;}
+  .hub .name{font-weight:700; font-size:15px;}
+  .hub .role{font-size:11.5px; color:var(--muted);}
+  .hub .io{font-family:var(--mono); font-size:11px; color:var(--faint); text-align:left; line-height:1.7; border-top:1px solid var(--line); padding-top:9px;}
+  .creative{grid-template-columns:1.5fr 1fr;}
+  @media(max-width:760px){ .creative{grid-template-columns:1fr;} .grid2{grid-template-columns:1fr;} }
+  .fou{border:1px solid rgba(224,161,58,.55); border-radius:14px; background:linear-gradient(180deg, rgba(224,161,58,.07), var(--bg2)); padding:16px;}
+  .fou h4{margin:0 0 10px; font-size:13px; font-family:var(--mono); letter-spacing:.06em; color:var(--orange); text-transform:uppercase;}
+  .firewall{border:1px solid var(--orange); border-radius:9px; padding:8px 12px; font-size:12px; color:var(--muted); background:rgba(224,161,58,.06); margin-bottom:10px;}
+  .firewall b{color:var(--orange);}
+  .foustep{border:1px solid var(--line2); border-radius:8px; background:var(--panel2); padding:9px 12px; font-size:12.5px; text-align:center; margin-bottom:6px;}
+  .foustep.pool{border-color:var(--orange); font-weight:650;}
+  .global{border:1.5px solid var(--red); border-radius:14px; background:linear-gradient(180deg, rgba(242,96,79,.08), var(--bg2)); padding:16px; display:flex; flex-direction:column; gap:8px;}
+  .global h4{margin:0; font-size:13px; font-family:var(--mono); color:var(--red); letter-spacing:.06em; text-transform:uppercase;}
+  .io-in,.io-out{font-size:12px; border:1px solid var(--line2); border-radius:8px; padding:8px 11px; background:var(--panel2); color:var(--muted);}
+  .io-out{border-color:var(--red); color:var(--ink);}
+  .learn{border-color:var(--violet); background:linear-gradient(180deg, rgba(168,132,240,.09), var(--bg2));}
+  .learnflow{display:flex; align-items:center; gap:12px; flex-wrap:wrap;}
+  .learnflow .step{flex:1; min-width:150px; border:1px solid var(--line2); border-radius:10px; background:var(--panel2); padding:11px 13px; font-size:12.5px;}
+  .learnflow .step b{color:var(--violet);}
+  .learnflow .step small{display:block; color:var(--faint); font-family:var(--mono); font-size:11px; margin-top:3px;}
+  .learnflow .ar{color:var(--violet); font-family:var(--mono); font-size:18px;}
+  .immut{margin-top:12px; font-size:12px; color:var(--muted); font-family:var(--mono);}
+  .immut b{color:var(--violet);}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:6px;}
+  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  th,td{text-align:left; padding:7px 10px; border-bottom:1px solid var(--line);}
+  th{font-family:var(--mono); font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--faint); font-weight:500;}
+  td.mono{font-family:var(--mono); color:var(--ink);}
+  .badge{font-family:var(--mono); font-size:11px; padding:2px 7px; border-radius:5px; border:1px solid var(--line2);}
+  .b-peu{color:var(--teal); border-color:rgba(56,198,207,.5);}
+  .b-norm{color:var(--green); border-color:rgba(65,196,113,.5);}
+  .b-beau{color:var(--orange); border-color:rgba(224,161,58,.5);}
+  .foot{margin-top:26px; text-align:center; font-family:var(--mono); font-size:11.5px; color:var(--faint);}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="wrap">
+
+  <div class="eyebrow">LLM Hunter — Pentest / Bug Bounty AI Engine</div>
+  <h1>Pipeline architecture</h1>
+  <p class="lede">The authorized scope (<code>rules.yaml</code>) is the only guardrail — no relevance filter, no self-censorship. Authorization is symmetric: exactly what is permitted, no more and no less. LLM-agnostic; models are tiers, realized per runtime.</p>
+
+  <div class="legend">
+    <b><span class="sw" style="background:var(--blue)"></span>Intake / rules</b>
+    <b><span class="sw" style="background:var(--green)"></span>Main workflow</b>
+    <b><span class="sw" style="background:var(--orange)"></span>Creative pool</b>
+    <b><span class="sw" style="background:var(--red)"></span>Super-agents</b>
+    <b><span class="sw" style="background:var(--teal)"></span>Persistence controller</b>
+    <b><span class="sw" style="background:var(--violet)"></span>Learning / skills</b>
+  </div>
+
+  <div class="spine">
+
+    <div class="card band intake">
+      <div>
+        <h3 style="color:var(--blue)">0 · Intake — pentest-intake (mandatory)</h3>
+        <div class="tag">legitimacy gate + config, asked BEFORE any test</div>
+        <div class="qlist">
+          <span>Engagement type + authorization proof (blocks if unverified)</span>
+          <span>Scope source · budget mode · learning on/off</span>
+          <span>Runtime: provider · multi-model or single-model</span>
+        </div>
+      </div>
+      <div class="arrow">→ scope-analyst →</div>
+      <div class="rules card" style="padding:14px 16px;">
+        <h3 style="color:var(--blue); margin-bottom:8px;">rules.yaml</h3>
+        <div class="code">
+          <span class="k">authorization</span> · verified<br>
+          <span class="k">scope</span> · in/out · internal_forbidden<br>
+          <span class="k">tools.allowed</span> (all permitted, forbid only forbidden)<br>
+          <span class="k">limits</span> · <span class="k">budget</span> · <span class="k">runtime</span> · <span class="k">learning</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="banner"><b>rules.yaml injected into every agent.</b> Each agent reads the skill bank before executing · a tool absent from allowed = forbidden · no self-censorship on likelihood of success.</div>
+
+    <div class="band loop">
+      <div class="wf">
+        <h4>① Recon workflow</h4>
+        <div class="tag">N tool-agents = 1 per authorized tool (inclusive)</div>
+        <div class="row5">
+          <span class="node">tool-agent</span><span class="node">tool-agent</span><span class="node">tool-agent</span>
+          <span class="node">…</span><span class="node">×N <span class="s">cheap</span></span>
+        </div>
+        <div class="flow">↓ chunk by 5</div>
+        <div class="row5">
+          <span class="node mid">orchestrator</span><span class="node mid">orchestrator</span><span class="node mid">×⌈N/5⌉ <span class="s">mid</span></span>
+        </div>
+        <div class="flow">↓ small conclusions</div>
+        <div class="node master">master-recon <span class="s">big conclusion · raw surface</span></div>
+      </div>
+
+      <div class="hub">
+        <div>
+          <div class="name">🧠 Super-Agent · Principal</div>
+          <div class="role">drives the Recon ⇄ Attack loop</div>
+        </div>
+        <div class="io">
+          ← recon big conclusion<br>
+          → leads + tools to test<br>
+          ← findings (post-persistence)<br>
+          ↻ continue / stop / pivot<br>
+          ← correlations from Global
+        </div>
+      </div>
+
+      <div class="wf">
+        <h4>② Attack workflow</h4>
+        <div class="tag">N tool-agents → ⌈N/5⌉ orchestrators</div>
+        <div class="row5">
+          <span class="node">tool-agent</span><span class="node">tool-agent</span><span class="node">…×N</span>
+        </div>
+        <div class="flow">↓ chunk by 5 · small conclusions</div>
+        <div class="node master">master-attack</div>
+        <div class="flow">↓ mandatory check</div>
+        <div class="node ctrl">🛡️ persistence-controller <span class="s">retry with a new angle until exhausted / budget</span></div>
+        <div class="retry">↺ suspect negative → sent back with a NEW angle<br>(retry as many times as needed — deep retry)</div>
+      </div>
+    </div>
+
+    <div class="band creative">
+      <div class="fou">
+        <h4>🎲 Creative pool — "crazy agents"</h4>
+        <div class="firewall"><b>FIREWALL</b> — receives ONLY the raw attack surface + rules.yaml. Never prior verdicts ("exhausted / closed"), never the patched catalog. Anti-defeatism by construction.</div>
+        <div class="foustep pool">Crazy agents ×poolSize <span class="tag">— extreme hypotheses, no memory</span></div>
+        <div class="flow">↓</div>
+        <div class="foustep">Crazy recon → Crazy attack <span class="tag">(same structure, no self-censorship)</span></div>
+        <div class="flow">↓</div>
+        <div class="foustep">crazy master-attack → 🛡️ persistence <span class="tag">(retry until exhausted)</span></div>
+        <div class="flow">↓ raw conclusion, no relevance filter</div>
+      </div>
+
+      <div class="global">
+        <h4>🧠 Super-Agent · Global</h4>
+        <div class="role tag">correlates creative ⇄ main · subordinate to Principal</div>
+        <div class="io-in">← state of the main attack</div>
+        <div class="io-in">← raw creative conclusion (crazy)</div>
+        <div class="io-out">→ decides the relevant correlation, hands it back to Principal</div>
+        <div class="tag" style="margin-top:2px">The only relevance filter for the creative world — and it runs AFTER generation, never before.</div>
+      </div>
+    </div>
+
+    <div class="card band learn">
+      <h3 style="color:var(--violet)">Self-learning loop — the engine sharpens run after run</h3>
+      <div class="learnflow">
+        <div class="step"><b>Stage 1 · raw capture</b><small>any agent → inbox</small>A discovered bypass/technique is dropped raw (draft OK) + notify.</div>
+        <div class="ar">→</div>
+        <div class="step"><b>Stage 2 · skill-writer</b><small>super-agent · strong · end of campaign</small>Reformats the inbox into clean, deduplicated, reusable skills.</div>
+        <div class="ar">→</div>
+        <div class="step"><b>skills/learned/</b><small>read by all on the next run</small>The bank grows; the next run benefits immediately.</div>
+      </div>
+      <div class="immut"><b>Immutability</b> — atomic agents write only to <code>learned/_inbox/</code>; the skill-writer may also update the global config (skill bank + tools catalog). No one touches the base runs (<code>workflows/</code>, <code>agents/</code>, <code>rules/</code>).</div>
+    </div>
+
+    <div class="grid2">
+      <div class="card">
+        <h3 style="color:var(--orange)">Budget modes — creative pool + retry, one dial</h3>
+        <table>
+          <thead><tr><th>Mode</th><th>Crazy pool</th><th>Retry</th></tr></thead>
+          <tbody>
+            <tr><td><span class="badge b-peu">few</span></td><td class="mono">⌊base/2⌋</td><td class="mono">2</td></tr>
+            <tr><td><span class="badge b-norm">normal ·default</span></td><td class="mono">base_fou</td><td class="mono">3</td></tr>
+            <tr><td><span class="badge b-beau">many</span></td><td class="mono">2 × base</td><td class="mono">3</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <h3 style="color:var(--green)">Model tiers (realized per runtime)</h3>
+        <table>
+          <tbody>
+            <tr><td class="mono">tool-agents</td><td>cheap · many, mechanical</td></tr>
+            <tr><td class="mono">orchestrators</td><td>mid · synthesis of ≤5</td></tr>
+            <tr><td class="mono">masters</td><td>mid · drives decisions</td></tr>
+            <tr><td class="mono">persistence · crazy · skill-writer</td><td>strong · judgment / creativity</td></tr>
+            <tr><td class="mono">super-agents</td><td>strong · strategy, few</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="foot">10 agent roles · 5 skills (+ learned/) · 4 workflows · scope = the only guardrail</div>
+
+</div>
+</div>
+</body>
+</html>

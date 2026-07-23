@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1240 520" width="1240" height="520" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" role="img" aria-label="LLM Hunter architecture">
+  <defs>
+    <marker id="arw" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#93a1b2"/></marker>
+    <marker id="arwv" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a884f0"/></marker>
+  </defs>
+
+  <rect x="0" y="0" width="1240" height="520" rx="16" fill="#0c0f14" stroke="#28313e"/>
+
+  <!-- ===== INTAKE ROW ===== -->
+  <rect x="40" y="26" width="160" height="50" rx="9" fill="#0d2233" stroke="#5b8def"/>
+  <text x="120" y="47" text-anchor="middle" fill="#e7eef6" font-size="14" font-weight="600">pentest-intake</text>
+  <text x="120" y="63" text-anchor="middle" fill="#93a1b2" font-size="11">legitimacy gate + config</text>
+  <line x1="200" y1="51" x2="226" y2="51" stroke="#93a1b2" stroke-width="2" marker-end="url(#arw)"/>
+  <rect x="228" y="26" width="140" height="50" rx="9" fill="#0d2233" stroke="#5b8def"/>
+  <text x="298" y="55" text-anchor="middle" fill="#e7eef6" font-size="14" font-weight="600">scope-analyst</text>
+  <line x1="368" y1="51" x2="394" y2="51" stroke="#93a1b2" stroke-width="2" marker-end="url(#arw)"/>
+  <rect x="396" y="26" width="220" height="50" rx="9" fill="#0d2233" stroke="#5b8def" stroke-width="2"/>
+  <text x="506" y="47" text-anchor="middle" fill="#e7eef6" font-size="15" font-weight="700">rules.yaml</text>
+  <text x="506" y="63" text-anchor="middle" fill="#93a1b2" font-size="11">the only guardrail · injected to all</text>
+  <line x1="506" y1="76" x2="432" y2="156" stroke="#93a1b2" stroke-width="2" marker-end="url(#arw)"/>
+
+  <!-- ===== MAIN LOOP ===== -->
+  <rect x="24" y="110" width="772" height="220" rx="14" fill="none" stroke="#28313e"/>
+  <text x="38" y="130" fill="#6b7889" font-size="11" letter-spacing="2" font-family="ui-monospace, monospace">MAIN LOOP</text>
+
+  <!-- Recon -->
+  <rect x="48" y="150" width="220" height="40" rx="8" fill="#10240f" stroke="#41c471"/>
+  <text x="158" y="168" text-anchor="middle" fill="#e7eef6" font-size="12.5">N tool-agents</text>
+  <text x="158" y="182" text-anchor="middle" fill="#93a1b2" font-size="10.5">1 per authorized tool (inclusive)</text>
+  <rect x="48" y="198" width="220" height="34" rx="8" fill="#10240f" stroke="#41c471"/>
+  <text x="158" y="219" text-anchor="middle" fill="#e7eef6" font-size="12.5">⌈N/5⌉ orchestrators</text>
+  <rect x="48" y="240" width="220" height="36" rx="8" fill="#153a1c" stroke="#41c471"/>
+  <text x="158" y="262" text-anchor="middle" fill="#e7eef6" font-size="12.5" font-weight="600">master-recon</text>
+
+  <!-- Principal -->
+  <rect x="300" y="160" width="200" height="94" rx="12" fill="#2a1618" stroke="#f2604f" stroke-width="2"/>
+  <text x="400" y="196" text-anchor="middle" fill="#e7eef6" font-size="12.5">Super-Agent</text>
+  <text x="400" y="215" text-anchor="middle" fill="#e7eef6" font-size="15" font-weight="700">Principal</text>
+  <text x="400" y="235" text-anchor="middle" fill="#93a1b2" font-size="11">drives Recon ⇄ Attack</text>
+
+  <!-- Attack -->
+  <rect x="548" y="150" width="240" height="34" rx="8" fill="#10240f" stroke="#41c471"/>
+  <text x="668" y="171" text-anchor="middle" fill="#e7eef6" font-size="12.5">N tool-agents</text>
+  <rect x="548" y="188" width="240" height="34" rx="8" fill="#10240f" stroke="#41c471"/>
+  <text x="668" y="209" text-anchor="middle" fill="#e7eef6" font-size="12.5">⌈N/5⌉ orchestrators</text>
+  <rect x="548" y="226" width="240" height="34" rx="8" fill="#153a1c" stroke="#41c471"/>
+  <text x="668" y="247" text-anchor="middle" fill="#e7eef6" font-size="12.5" font-weight="600">master-attack</text>
+  <rect x="548" y="264" width="240" height="40" rx="8" fill="#122b2d" stroke="#38c6cf"/>
+  <text x="668" y="281" text-anchor="middle" fill="#e7eef6" font-size="12.5" font-weight="600">🛡 persistence-controller</text>
+  <text x="668" y="295" text-anchor="middle" fill="#38c6cf" font-size="10.5">retry with a new angle until exhausted / budget</text>
+
+  <!-- main-loop arrows (horizontal, in gutters) -->
+  <line x1="268" y1="250" x2="298" y2="226" stroke="#93a1b2" stroke-width="2" marker-end="url(#arw)"/>
+  <line x1="500" y1="198" x2="546" y2="198" stroke="#93a1b2" stroke-width="2" marker-end="url(#arw)"/>
+  <line x1="548" y1="284" x2="502" y2="250" stroke="#93a1b2" stroke-width="1.6" marker-end="url(#arw)"/>
+
+  <!-- firewall: raw_surface → crazy agents (orthogonal, far-left gutter, clears the label) -->
+  <polyline points="48,258 30,258 30,412 44,412" fill="none" stroke="#7d8aa0" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#arw)"/>
+
+  <!-- Global → Principal feedback (orthogonal, in the y≈342 gutter) -->
+  <polyline points="675,372 675,342 400,342 400,256" fill="none" stroke="#7d8aa0" stroke-width="1.6" marker-end="url(#arw)"/>
+  <text x="560" y="337" text-anchor="middle" fill="#7d8aa0" font-size="10">correlations</text>
+
+  <!-- ===== CREATIVE POOL ===== -->
+  <rect x="24" y="352" width="520" height="140" rx="14" fill="none" stroke="#e0a13a"/>
+  <text x="38" y="372" fill="#e0a13a" font-size="11" letter-spacing="1.2" font-family="ui-monospace, monospace">CREATIVE POOL — FIREWALLED · RAW SURFACE ONLY</text>
+  <rect x="44" y="388" width="150" height="48" rx="8" fill="#2a2210" stroke="#e0a13a"/>
+  <text x="119" y="410" text-anchor="middle" fill="#e7eef6" font-size="12.5">🎲 crazy agents</text>
+  <text x="119" y="425" text-anchor="middle" fill="#93a1b2" font-size="10.5">no memory of prior work</text>
+  <line x1="194" y1="412" x2="208" y2="412" stroke="#93a1b2" stroke-width="2" marker-end="url(#arw)"/>
+  <rect x="210" y="388" width="150" height="48" rx="8" fill="#2a2210" stroke="#e0a13a"/>
+  <text x="285" y="415" text-anchor="middle" fill="#e7eef6" font-size="12">crazy recon → attack</text>
+  <line x1="360" y1="412" x2="374" y2="412" stroke="#93a1b2" stroke-width="2" marker-end="url(#arw)"/>
+  <rect x="376" y="388" width="152" height="48" rx="8" fill="#2a2210" stroke="#e0a13a"/>
+  <text x="452" y="408" text-anchor="middle" fill="#e7eef6" font-size="12">crazy master</text>
+  <text x="452" y="423" text-anchor="middle" fill="#93a1b2" font-size="10.5">→ persistence (deep retry)</text>
+
+  <!-- ===== GLOBAL ===== -->
+  <rect x="580" y="372" width="190" height="100" rx="12" fill="#2a1618" stroke="#f2604f" stroke-width="2"/>
+  <text x="675" y="404" text-anchor="middle" fill="#e7eef6" font-size="12.5">Super-Agent</text>
+  <text x="675" y="423" text-anchor="middle" fill="#e7eef6" font-size="15" font-weight="700">Global</text>
+  <text x="675" y="443" text-anchor="middle" fill="#93a1b2" font-size="10.5">correlates creative ⇄ main</text>
+  <line x1="528" y1="412" x2="578" y2="418" stroke="#93a1b2" stroke-width="2" marker-end="url(#arw)"/>
+
+  <!-- ===== LEARNING PANEL ===== -->
+  <rect x="812" y="110" width="396" height="382" rx="14" fill="#160f24" stroke="#a884f0"/>
+  <text x="828" y="132" fill="#a884f0" font-size="11" letter-spacing="1.2" font-family="ui-monospace, monospace">SELF-LEARNING LOOP</text>
+  <rect x="836" y="152" width="340" height="52" rx="9" fill="#241a38" stroke="#a884f0"/>
+  <text x="1006" y="174" text-anchor="middle" fill="#e7eef6" font-size="12.5">any agent → inbox</text>
+  <text x="1006" y="190" text-anchor="middle" fill="#93a1b2" font-size="10.5">raw capture (draft OK) + notify</text>
+  <line x1="1006" y1="204" x2="1006" y2="224" stroke="#a884f0" stroke-width="2" marker-end="url(#arwv)"/>
+  <rect x="836" y="230" width="340" height="46" rx="9" fill="#241a38" stroke="#a884f0"/>
+  <text x="1006" y="258" text-anchor="middle" fill="#e7eef6" font-size="12.5" font-weight="600">skill-writer</text>
+  <line x1="1006" y1="276" x2="1006" y2="296" stroke="#a884f0" stroke-width="2" marker-end="url(#arwv)"/>
+  <rect x="836" y="300" width="340" height="46" rx="9" fill="#241a38" stroke="#a884f0"/>
+  <text x="1006" y="328" text-anchor="middle" fill="#e7eef6" font-size="12.5" font-weight="600">skills/learned/</text>
+  <text x="1006" y="374" text-anchor="middle" fill="#93a1b2" font-size="11">read before executing · base runs immutable</text>
+
+  <!-- discoveries: MAIN → learning (orthogonal, right gutter) -->
+  <polyline points="796,214 820,214 820,178 836,178" fill="none" stroke="#7d8aa0" stroke-width="1.6" stroke-dasharray="4 4" marker-end="url(#arwv)"/>
+  <text x="806" y="208" text-anchor="middle" fill="#7d8aa0" font-size="10">discoveries</text>
+</svg>

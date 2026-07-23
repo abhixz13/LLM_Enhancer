@@ -1,0 +1,19 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+
+# Node
+node_modules/
+npm-debug.log*
+
+# Scratch / local runtime
+scratchpad/
+*.log
+
+# Engagement data must NEVER be committed (lives in the operator's own vault)
+engagements/
+*.rules.local.yaml
